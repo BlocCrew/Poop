@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
@@ -25,18 +26,41 @@ public class Poop extends JavaPlugin implements Listener {
 	@SuppressWarnings("deprecation")
 	@EventHandler
 	public void onEat(PlayerItemConsumeEvent event){
-		ItemStack is = new ItemStack(Material.WOOL,1);
-		Wool wool = new Wool(DyeColor.BROWN);
-		is.setDurability(wool.getData());		
-		ItemMeta im = is.getItemMeta();
-		im.setDisplayName("Poop");
-		ArrayList<String> lore = new ArrayList<String>();
-		lore.add("Dispose of this");
-		lore.add("which you will");
-		im.setLore(lore);
-		is.setItemMeta(im);
-		event.getPlayer().getInventory().addItem(new ItemStack(is));
-		event.getPlayer().sendMessage("You will now need to poop");
+		ItemStack isPoop = new ItemStack(Material.WOOL,1);
+		Wool woolPoop = new Wool(DyeColor.BROWN);
+		isPoop.setDurability(woolPoop.getData());		
+		ItemMeta imPoop = isPoop.getItemMeta();
+		imPoop.setDisplayName("Poop");
+		ArrayList<String> lorePoop = new ArrayList<String>();
+		lorePoop.add("Dispose of this");
+		lorePoop.add("which you will");
+		imPoop.setLore(lorePoop);
+		isPoop.setItemMeta(imPoop);
+		
+		ItemStack isPee = new ItemStack(Material.WOOL,1);
+		Wool woolPee = new Wool(DyeColor.YELLOW);
+		isPee.setDurability(woolPee.getData());
+		ItemMeta imPee = isPoop.getItemMeta();
+		imPee.setDisplayName("Pee");
+		ArrayList<String> lorePee = new ArrayList<String>();
+		lorePee.add("Ewwwww...");
+		lorePee.add("That's nasty!");
+		imPee.setLore(lorePee);
+		isPee.setItemMeta(imPee);
+		
+		Player player = event.getPlayer();
+		ItemStack item = event.getItem();
+		int itemID = item.getTypeId();
+		
+		if (itemID == 373){
+			player.getInventory().addItem(new ItemStack(isPee));
+			player.sendMessage("You will now need to pee");
+			
+		}else{
+			player.getInventory().addItem(new ItemStack(isPoop));
+			player.sendMessage("You will now need to poop");
+		}
+		
 	}
 	
 }
