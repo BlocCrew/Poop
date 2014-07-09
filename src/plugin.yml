@@ -1,0 +1,6 @@
+name: Poop
+version: 1.0.0
+description: Players can now poop
+author: norway240
+website: http://www.norway240.com
+main: com.norway240.poop.Poop
