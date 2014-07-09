@@ -1,11 +1,16 @@
 package com.norway240.poop; 
 
 import java.util.ArrayList;
+import java.util.List;
 
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -15,6 +20,7 @@ import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.material.Dye;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -99,6 +105,34 @@ public class Poop extends JavaPlugin implements Listener {
 			world.createExplosion(loc, 0);
 			player.sendMessage("You might want to talk to a doctor...");
 		}
+	}
+	
+	@Override
+	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+		if (cmd.getName().equalsIgnoreCase("poop")){
+			Plugin poopplugin = Bukkit.getServer().getPluginManager().getPlugin("Poop");
+			String v = poopplugin.getDescription().getVersion();
+			
+			if(args.length == 0){
+				String w = poopplugin.getDescription().getWebsite();
+				List<String> a = poopplugin.getDescription().getAuthors();
+				String d = poopplugin.getDescription().getDescription();
+				
+				sender.sendMessage("Poop "+ChatColor.BLUE+"v"+v);
+				sender.sendMessage(d);
+				sender.sendMessage("Website: "+ChatColor.BLUE+w);
+				sender.sendMessage("Author: "+ChatColor.BLUE+a);
+			}else if(args.length == 1){
+				if(args[0].equalsIgnoreCase("version")){
+					sender.sendMessage("Poop "+ChatColor.BLUE+"v"+v);
+				}else if(args[0].equalsIgnoreCase("update")){
+					sender.sendMessage("Poop "+ChatColor.BLUE+"v"+v);
+					sender.sendMessage("Unable to check for update at this time...");
+				}
+			}
+			return true;
+		}
+		return false;
 	}
 	
 }

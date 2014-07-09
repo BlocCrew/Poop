@@ -2,5 +2,17 @@ name: Poop
 version: 1.4.0
 description: Players can now poop
 author: norway240
-website: http://www.norway240.com
+website: http://dev.bukkit.org/bukkit-plugins/poop-plugin/
 main: com.norway240.poop.Poop
+
+commands:
+   poop:
+      description: Displays info about the Plugin
+      usage: /poop
+      permission: poop
+      permission-message: You don't have permission to use /poop
+
+permissions:
+    poop:
+        description: Allows acess to view info about the poop plugin
+        default: op
