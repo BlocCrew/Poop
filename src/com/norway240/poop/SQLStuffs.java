@@ -28,15 +28,15 @@ public class SQLStuffs {
 	      c.commit();
 	      c.close();
 	    } catch ( Exception e ) {
-	      System.err.println( e.getClass().getName() + ": " + e.getMessage() );
-	      System.exit(0);
+	      System.err.println("[Poop]" + e.getClass().getName() + ": " + e.getMessage() );
 	    }
 	}
 	
-	public int getEaten(String name){
+	public int[] getEaten(String name){
+		int[] eaten = new int[3];
 		Connection c = null;
 	    Statement stmt = null;
-		int eaten = 0;
+		int poop=0, pee=0, diarrhea=0;
 	    try {
 	    	Class.forName("org.sqlite.JDBC");
 	    	c = DriverManager.getConnection("jdbc:sqlite:"+path);
@@ -45,15 +45,19 @@ public class SQLStuffs {
 	    	stmt = c.createStatement();
 	    	ResultSet rs = stmt.executeQuery("SELECT * FROM poopdata WHERE name = '"+name+"';");
 	    	while(rs.next()){
-	    		eaten = rs.getInt("eaten");
+	    		poop = rs.getInt("poop");
+	    		pee = rs.getInt("pee");
+	    		diarrhea = rs.getInt("diarrhea");
 	    	}
 	    	rs.close();
 	    	stmt.close();
 	    	c.close();
 	    } catch ( Exception e ) {
-	    	System.err.println( e.getClass().getName() + ": " + e.getMessage() );
-	    	System.exit(0);
+	    	System.err.println("[Poop]" + e.getClass().getName() + ": " + e.getMessage() );
 	    }
+	    eaten[0] = poop;
+	    eaten[1] = pee;
+	    eaten[2] = diarrhea;
 		return eaten;
 	}
 }

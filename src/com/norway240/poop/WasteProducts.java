@@ -14,11 +14,12 @@ public class WasteProducts {
 	private ItemStack isPee;
 	private ItemStack isDiarrhea;
 	
+	@SuppressWarnings("deprecation")
 	public WasteProducts(){
 		isPoop = new ItemStack(Material.INK_SACK,1);
 		Dye dyePoop = new Dye();
 		dyePoop.setColor(DyeColor.BROWN);
-		isPoop.setDurability(dyePoop.getData());		
+		isPoop.setDurability(dyePoop.getData());	
 		ItemMeta imPoop = isPoop.getItemMeta();
 		imPoop.setDisplayName("Poop");
 		ArrayList<String> lorePoop = new ArrayList<String>();

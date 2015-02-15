@@ -7,11 +7,11 @@ main: com.norway240.poop.Poop
 
 commands:
    poop:
-      description: Does things
-      usage: /poop [info, version, update]
+      description: Allows the player to poop
+      usage: /poop
       permission: poop
 
 permissions:
     poop:
-        description: Does things
+        description: Allows the player to poop
         default: true
