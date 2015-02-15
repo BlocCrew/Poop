@@ -1,134 +1,107 @@
 package com.norway240.poop; 
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.File;
+import java.util.logging.Logger;
 
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.DyeColor;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.material.Dye;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 
 public class Poop extends JavaPlugin implements Listener {
-	public void onEnable() {
-		getLogger().info("Poop has been enabled! (a plugin by norway240)");
-		getServer().getPluginManager().registerEvents(this, this);
-	}
-  
+	
+	static final Logger log = Bukkit.getLogger();
+	private SQLStuffs sqlite;
+	private WasteProducts waste = new WasteProducts();
+	  
 	public void onDisable() {
-		getLogger().info("Poop has been disabled! (a plugin by norway240)");
+		log.info("Poop has been disabled! (a plugin by norway240)");
 	}
 	
-	@SuppressWarnings("deprecation")
+	public void onEnable() {
+		Plugin plugin = Bukkit.getPluginManager().getPlugin("Poop");
+		String dbpath = plugin.getDataFolder().getAbsolutePath();
+		File file = new File(dbpath);
+		String dbfn = "poopdb.db";
+		
+		if (!file.exists()) {
+			if(file.mkdir()) {
+				System.out.println("Poop Directory is created!");
+			}else{
+				System.out.println("Failed to create Poop directory!");
+			}
+		}
+		
+		String db = dbpath + "/" + dbfn;
+		sqlite = new SQLStuffs(db);
+		sqlite.execute("CREATE TABLE IF NOT EXISTS poopdata (name TEXT, eaten INTEGER);");
+		
+		log.info("Poop has been enabled! (a plugin by norway240)");
+		getServer().getPluginManager().registerEvents(this, this);
+	}
+	
 	@EventHandler
 	public void onEat(PlayerItemConsumeEvent event){
-		ItemStack isPoop = new ItemStack(Material.INK_SACK,1);
-		Dye dyePoop = new Dye();
-		dyePoop.setColor(DyeColor.BROWN);
-		isPoop.setDurability(dyePoop.getData());		
-		ItemMeta imPoop = isPoop.getItemMeta();
-		imPoop.setDisplayName("Poop");
-		ArrayList<String> lorePoop = new ArrayList<String>();
-		lorePoop.add("Dispose of this");
-		lorePoop.add("which you will");
-		imPoop.setLore(lorePoop);
-		isPoop.setItemMeta(imPoop);
-		
-		ItemStack isPee = new ItemStack(Material.INK_SACK,1);
-		Dye dyePee = new Dye();
-		dyePee.setColor(DyeColor.YELLOW);
-		isPee.setDurability(dyePee.getData());
-		ItemMeta imPee = isPoop.getItemMeta();
-		imPee.setDisplayName("Pee");
-		ArrayList<String> lorePee = new ArrayList<String>();
-		lorePee.add("Ewwwww...");
-		lorePee.add("That's nasty!");
-		imPee.setLore(lorePee);
-		isPee.setItemMeta(imPee);
-		
-		ItemStack isDiarrhea = new ItemStack(Material.INK_SACK,1);
-		Dye dyeDiarrhea = new Dye();
-		dyeDiarrhea.setColor(DyeColor.GREEN);
-		isDiarrhea.setDurability(dyeDiarrhea.getData());
-		ItemMeta imDiarrhea = isDiarrhea.getItemMeta();
-		imDiarrhea.setDisplayName("Diarrhea");
-		ArrayList<String> loreDiarrhea = new ArrayList<String>();
-		loreDiarrhea.add("Get to the");
-		loreDiarrhea.add("BATHROOM!");
-		imDiarrhea.setLore(loreDiarrhea);
-		isDiarrhea.setItemMeta(imDiarrhea);
-		
 		Player player = event.getPlayer();
-		ItemStack item = event.getItem();
-		int itemID = item.getTypeId();
+		String name = player.getName();
 		
-		if ((itemID == 373)||(itemID == 335)){
-			player.getInventory().addItem(new ItemStack(isPee));
-			player.sendMessage("You will now need to pee");
-		}else if(itemID == 367){
-			PotionEffect pe = new PotionEffect(PotionEffectType.CONFUSION, 600, 1);
-			player.addPotionEffect(pe);
-			player.getInventory().addItem(new ItemStack(isDiarrhea));
-			player.sendMessage("I think you need to go to the bathroom");
+		sqlite.execute("UPDATE poopdata SET eaten = eaten + 1 WHERE name = '"+name+"';");
+		int e = sqlite.getEaten(name);
+		
+		if(e>=10){
+			Location loc = player.getLocation();
+			World world = loc.getWorld();
+			
+			for(int i=0; i<e*2; i++){
+				world.dropItemNaturally(loc, waste.Poop());
+			}
+			//world.createExplosion(loc, 0);
+			sqlite.execute("UPDATE poopdata SET eaten = 0 WHERE name = '"+name+"';");
+			player.sendMessage("You have now relieved yourself.");
 		}else{
-			player.getInventory().addItem(new ItemStack(isPoop));
-			player.sendMessage("You will now need to poop");
+			if(e>=7){
+				player.sendMessage("You've eaten a lot, you might want to go to the bathroom soon.");
+			}else{
+				player.sendMessage("You've eaten "+e+" things since your last poop");
+			}
 		}
-		
 	}
-
+	
 	@EventHandler
-	public void onDrop(PlayerDropItemEvent event){
-		Player player = event.getPlayer();
-		Location loc = player.getLocation();
-		World world = loc.getWorld();
-		Item item = event.getItemDrop();
-		ItemStack is = item.getItemStack();
-		String name = is.getItemMeta().getDisplayName().toString();
-		if (name.equalsIgnoreCase("Diarrhea")){
-			world.createExplosion(loc, 0);
-			player.sendMessage("You might want to talk to a doctor...");
-		}
+	public void onPlayerJoin(PlayerJoinEvent event){
+		String name = event.getPlayer().getName();
+		sqlite.execute("INSERT INTO poopdata(name, eaten) VALUES('"+name+"', '0');");
 	}
 	
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 		if (cmd.getName().equalsIgnoreCase("poop")){
-			Plugin poopplugin = Bukkit.getServer().getPluginManager().getPlugin("Poop");
-			String v = poopplugin.getDescription().getVersion();
-			
-			if(args.length == 0){
-				String w = poopplugin.getDescription().getWebsite();
-				List<String> a = poopplugin.getDescription().getAuthors();
-				String d = poopplugin.getDescription().getDescription();
+			if(sender instanceof Player){
+				Player player = (Player) sender;
+				String name = player.getName();
+				Location loc = player.getLocation();
+				World world = loc.getWorld();
+				int e = sqlite.getEaten(name);
 				
-				sender.sendMessage("Poop "+ChatColor.BLUE+"v"+v);
-				sender.sendMessage(d);
-				sender.sendMessage("Website: "+ChatColor.BLUE+w);
-				sender.sendMessage("Author: "+ChatColor.BLUE+a);
-			}else if(args.length == 1){
-				if(args[0].equalsIgnoreCase("version")){
-					sender.sendMessage("Poop "+ChatColor.BLUE+"v"+v);
-				}else if(args[0].equalsIgnoreCase("update")){
-					sender.sendMessage("Poop "+ChatColor.BLUE+"v"+v);
-					sender.sendMessage("Unable to check for update at this time...");
+				if(e>=1){
+					for(int i=0; i<e*2; i++){
+						world.dropItem(loc, waste.Poop());
+					}
+					sqlite.execute("UPDATE poopdata SET eaten = 0 WHERE name = '"+name+"';");
+					sender.sendMessage("You have now relieved yourself.");
+				}else{
+					sender.sendMessage("You can't poop right now");
 				}
+			}else{
+				sender.sendMessage("You can't poop right now");
 			}
 			return true;
 		}
